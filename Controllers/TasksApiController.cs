@@ -18,28 +18,55 @@ namespace TaskManagementSystem.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetTasks() => Ok(_context.Tasks.ToList());
+        public IActionResult GetTasks()
+        {
+            var tasks = _context.Tasks
+                .Select(task => new TaskItemDTO
+                {
+                    Id = task.Id,
+                    Title = task.Title,
+                    Description = task.Description,
+                    Status = task.Status,
+                    AssignedToUserId = task.AssignedToUserId,
+                    AssignedToUserName = task.AssignedUser != null ? task.AssignedUser.UserName : null
+                }).ToList();
+
+            return Ok(tasks);
+        }
 
         [HttpPost]
-        public IActionResult CreateTask([FromBody] TaskItem task)
+        public IActionResult CreateTask([FromBody] TaskItemDTO dto)
         {
+            var task = new TaskItem
+            {
+                Title = dto.Title,
+                Description = dto.Description,
+                Status = dto.Status,
+                AssignedToUserId = dto.AssignedToUserId
+            };
+
             _context.Tasks.Add(task);
             _context.SaveChanges();
-            return CreatedAtAction(nameof(GetTasks), new { id = task.Id }, task);
+
+            dto.Id = task.Id; // return back the created Id
+
+            return CreatedAtAction(nameof(GetTasks), new { id = task.Id }, dto);
         }
 
         [HttpPut("{id}")]
-        public IActionResult UpdateTask(int id, [FromBody] TaskItem taskUpdate)
+        public IActionResult UpdateTask(int id, [FromBody] TaskItemDTO dto)
         {
             var task = _context.Tasks.Find(id);
             if (task == null) return NotFound();
 
-            task.Title = taskUpdate.Title;
-            task.Description = taskUpdate.Description;
-            task.Status = taskUpdate.Status;
+            task.Title = dto.Title;
+            task.Description = dto.Description;
+            task.Status = dto.Status;
+            task.AssignedToUserId = dto.AssignedToUserId;
 
             _context.SaveChanges();
-            return Ok(task);
+
+            return Ok(dto);
         }
 
         [HttpDelete("{id}")]
