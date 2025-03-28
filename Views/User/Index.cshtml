@@ -12,6 +12,7 @@
             <th>Title</th>
             <th>Description</th>
             <th>Status</th>
+            <th>Action</th>
         </tr>
     </thead>
     <tbody>
@@ -21,6 +22,19 @@
                 <td>@task.Title</td>
                 <td>@task.Description</td>
                 <td>@task.Status</td>
+                <td>
+                    @if (task.Status != TaskManagementSystem.Models.TaskStatus.Completed)
+                    {
+                        <form asp-action="MarkAsCompleted" method="post" style="display:inline;">
+                            <input type="hidden" name="id" value="@task.Id" />
+                            <button type="submit" class="btn btn-sm btn-success">Mark as Completed</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <span class="text-success">Completed</span>
+                    }
+                </td>
             </tr>
         }
     </tbody>

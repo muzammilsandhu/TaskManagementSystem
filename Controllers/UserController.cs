@@ -20,5 +20,22 @@ namespace TaskManagementSystem.Controllers
             var tasks = _context.Tasks.Where(t => t.AssignedToUserId == userId).ToList();
             return View(tasks);
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult MarkAsCompleted(int id)
+        {
+            var task = _context.Tasks.FirstOrDefault(t => t.Id == id);
+
+            if (task == null || task.AssignedToUserId != User.FindFirstValue(ClaimTypes.NameIdentifier))
+            {
+                return Unauthorized();
+            }
+
+            task.Status = Models.TaskStatus.Completed;
+            _context.SaveChanges();
+
+            return RedirectToAction(nameof(Index));
+        }
     }
 }
