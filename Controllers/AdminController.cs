@@ -47,6 +47,59 @@ namespace TaskManagementSystem.Controllers
             return View(taskItem);
         }
 
+        // GET: Edit Task
+        public async Task<IActionResult> Edit(int id)
+        {
+            var task = await _context.Tasks.FindAsync(id);
+            if (task == null)
+                return NotFound();
+
+            ViewBag.Users = await _userManager.Users.ToListAsync();
+            return View(task);
+        }
+
+        // POST: Edit Task
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, TaskItem taskItem)
+        {
+            if (id != taskItem.Id)
+                return NotFound();
+
+            if (ModelState.IsValid)
+            {
+                _context.Update(taskItem);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            ViewBag.Users = await _userManager.Users.ToListAsync();
+            return View(taskItem);
+        }
+
+        // GET: Delete Task
+        public async Task<IActionResult> Delete(int id)
+        {
+            var task = await _context.Tasks.Include(t => t.AssignedUser).FirstOrDefaultAsync(t => t.Id == id);
+            if (task == null)
+                return NotFound();
+
+            return View(task);
+        }
+
+        // POST: Confirm Delete
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var task = await _context.Tasks.FindAsync(id);
+            if (task != null)
+            {
+                _context.Tasks.Remove(task);
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction(nameof(Index));
+        }
+
         // Show all tasks in Admin Panel
         public async Task<IActionResult> Index()
         {
