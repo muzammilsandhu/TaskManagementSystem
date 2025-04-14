@@ -1,4 +1,11 @@
-﻿@model TaskManagementSystem.Models.TaskItem
+﻿@using System.Security.Claims
+
+@{
+    var user = Context.User;
+    bool canCreate = user.HasClaim("Permission", AppPermissions.CanCreateTask);
+}
+
+@model TaskManagementSystem.Models.TaskItem
 
 @{
     ViewData["Title"] = "Create Task";
@@ -6,6 +13,9 @@
 
 <h2>Create Task</h2>
 
+<!-- Show Create Task form only if the user has the "CanCreateTask" permission -->
+@if (canCreate)
+{
 <form asp-action="Create" method="post">
     <div class="form-group">
         <label for="Title">Title</label>
@@ -27,12 +37,17 @@
         <select class="form-control" asp-for="AssignedToUserId">
             <option value="">-- Select User --</option>
             @foreach (var user in ViewBag.Users)
-            {
-                <option value="@user.Id">@user.Email</option>
-            }
+                {
+            <option value="@user.Id">@user.Email</option>
+                }
         </select>
     </div>
 
     <button type="submit" class="btn btn-primary">Create Task</button>
     <a asp-action="Index" class="btn btn-secondary">Cancel</a>
 </form>
+}
+else
+{
+<p>You do not have permission to create a task.</p>
+}

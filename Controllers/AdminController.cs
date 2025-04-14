@@ -7,7 +7,6 @@ using TaskManagementSystem.Models;
 
 namespace TaskManagementSystem.Controllers
 {
-    [Authorize(Roles = "Admin")]
     public class AdminController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -20,6 +19,7 @@ namespace TaskManagementSystem.Controllers
         }
 
         // Display form to create a task
+        [PermissionAuthorize (AppPermissions.CanCreateTask)]
         public async Task<IActionResult> Create()
         {
             ViewBag.Users = await _userManager.Users.ToListAsync();
@@ -48,6 +48,7 @@ namespace TaskManagementSystem.Controllers
         }
 
         // GET: Edit Task
+        [PermissionAuthorize (AppPermissions.CanEditTask)]
         public async Task<IActionResult> Edit(int id)
         {
             var task = await _context.Tasks.FindAsync(id);
@@ -77,6 +78,7 @@ namespace TaskManagementSystem.Controllers
         }
 
         // GET: Delete Task
+        [PermissionAuthorize (AppPermissions.CanDeleteTask)]
         public async Task<IActionResult> Delete(int id)
         {
             var task = await _context.Tasks.Include(t => t.AssignedUser).FirstOrDefaultAsync(t => t.Id == id);
@@ -101,6 +103,7 @@ namespace TaskManagementSystem.Controllers
         }
 
         // Show all tasks in Admin Panel
+        [PermissionAuthorize (AppPermissions.CanViewAllTasks)]
         public async Task<IActionResult> Index()
         {
             var tasks = await _context.Tasks.Include(t => t.AssignedUser).ToListAsync();
